@@ -25,9 +25,24 @@ var server = http.createServer(app);
  * Listen on provided port, on all network interfaces.
  */
 
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
+var MongoClient = require('mongodb').MongoClient;
+var db;
+
+MongoClient.connect('mongodb://admin:Admin123@ds135003.mlab.com:35003/crisis-dev', function (err, database) {
+    if (err) throw err;
+
+    db = database;
+
+    db.collection('Members').find().toArray(function (err, result) {
+        if (err) throw err
+
+        console.log(result)
+    })
+
+    server.listen(port);
+    server.on('error', onError);
+    server.on('listening', onListening);
+})
 
 /**
  * Normalize a port into a number, string, or false.
