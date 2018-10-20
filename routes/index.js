@@ -1,3 +1,4 @@
+var Utils = require("../Utils");
 var express = require('express');
 var router = express.Router();
 
@@ -47,13 +48,21 @@ router.post('/register', function (req, response, next) {
 router.post('/login', function (req, response, next) {
     const members = MembersCollection(req);
 
-    members.findOne({username: req.body.username}, function (err, res) {
+    members.findOne({username: req.body.username}, function (err, user) {
         if (err) response.json(err);
 
-        if (req.body.password === res.password) {
+        console.log(JSON.stringify(user));
+
+        if (!user) {
+            response.json('User not found.');
+            return;
+        }
+
+        if (user.password === req.body.password) {
             const token = "MYAUTHTOKEN12345";
 
-            const updatedMember = {res, token: token};
+            const updatedMember = user;
+            updatedMember.token = token;
 
             members.updateOne({username: req.body.username}, updatedMember, function (e, r) {
                if (e) response.json(e);
