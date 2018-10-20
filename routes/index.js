@@ -15,11 +15,11 @@ const MembersCollection = (req) => {
 };
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  res.json({ message: 'Hello Crisis!' });
+router.get('/', function (req, res, next) {
+    res.json({message: 'Hello Crisis!'});
 });
 
-router.post('/register', function(req, response, next) {
+router.post('/register', function (req, response, next) {
     let member = new Member(
         req.body.username,
         req.body.password
@@ -33,19 +33,37 @@ router.post('/register', function(req, response, next) {
         if (!res) {
             members.insertOne(member,
                 function (err, r) {
-                    if (err) res.json({ error: err });
+                    if (err) res.json({error: err});
 
                     response.json(member);
                 }
             );
         } else {
-            response.json({ message: 'Username is already in use'});
+            response.json({message: 'Username is already in use'});
         }
     });
 });
 
-router.get('/login', function(req, res, next) {
-  res.json({ body: req.body });
+router.post('/login', function (req, response, next) {
+    const members = MembersCollection(req);
+
+    members.findOne({username: req.body.username}, function (err, res) {
+        if (err) response.json(err);
+
+        if (req.body.password === res.password) {
+            const token = "MYAUTHTOKEN12345";
+
+            const updatedMember = {...res, token: token};
+
+            members.updateOne({username: req.body.username}, updatedMember, function (e, r) {
+               if (e) response.json(e);
+
+               response.json(updatedMember);
+            });
+        } else {
+            response.json({message: 'Username & password combination are incorrect'});
+        }
+    });
 });
 
 module.exports = router;
