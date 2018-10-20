@@ -53,7 +53,7 @@ router.post('/login', function (req, response, next) {
         if (req.body.password === res.password) {
             const token = "MYAUTHTOKEN12345";
 
-            const updatedMember = {...res, token: token};
+            const updatedMember = {res, token: token};
 
             members.updateOne({username: req.body.username}, updatedMember, function (e, r) {
                if (e) response.json(e);
